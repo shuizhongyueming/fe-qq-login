@@ -42,9 +42,9 @@ var API = {
     toLogin: function(opt){
         var baseUrl = 'https://graph.qq.com/oauth2.0/authorize';
         var dfOpt = {
-            redirectUrl: 'http://www.feiyun.tv/user/sourceLogin?source=loginredirect',
+            redirectUrl: '{{把login-redirect.html放到同域名的网页下}}',
             scope: 'all',
-            appId: 'YOUR APP ID',
+            appId: '{{在QQ开放平台注册的appId}}',
             display: 'mobile'
         };
 
