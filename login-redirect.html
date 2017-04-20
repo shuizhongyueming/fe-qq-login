@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <title>登录成功</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <meta name="apple-touch-fullscreen" content="yes">
+    <style type="text/css" media="screen">
+html {
+    font-size: 14px;
+    word-break: break-all;
+    color: #ccc;
+}
+img {
+    width: 50px;
+    height: 50px;
+    display: block;
+    margin: 2em auto;
+}
+h1 {
+    font-size: 16px;
+    color: #333;
+}
+.hide {
+    display: none;
+}
+p {
+    margin: 1em 0;
+}
+a {
+    color: #19a6ff;
+}
+    </style>
+</head>
+<body>
+    <h1>登录成功！正在返回登录前页面，请稍候...</h1>
+    <div id="click-jump" class="hide">
+        <p>如未跳转，请点击下方链接手动跳转</p>
+        <p><a href="#"></a></p>
+    </div>
+    <script charset="utf-8" type="text/javascript">
+        
+        /**
+        * 把一个queryStr转变为一个对象
+        * @param  {String} queryStr URL里面的query string 类似 aaa=b&ccc=d
+        * @return {Object}          一个对应的对象
+        * @demo query2Obj('aaa=b&ccc=d') ===> {aaa: 'b', ccc: 'd'}
+        */
+        function query2Obj(queryStr){
+
+            /**
+            * 如果直接传参是location.search ?mod=post&action=edit&fid=66
+            * 或者
+            * location.hash #aa=b&cc=d
+            * 的时候，需要进行过滤
+            */
+            queryStr = queryStr.replace('?', '').replace('#', '');
+
+            var arr = queryStr.split('&'),
+                obj = {},
+                i = 0,
+                len = arr.length,
+                currArr = null;
+
+            for (i; i < len; i++) {
+                currArr = arr[i].split('=');
+
+                obj[currArr[0]] = currArr[1];
+            }
+
+            return obj;
+        }
+
+        var hashQuery = query2Obj(location.hash);
+        var searchQuery = query2Obj(location.search);
+        var currTime = (new Date()).valueOf();
+        searchQuery.redirect = decodeURIComponent(searchQuery.redirect);
+
+        // 记录token
+        localStorage.setItem('QQAccessToken', hashQuery.access_token);
+
+        // 记录过期时间 expires_in 是秒数
+        localStorage.setItem('QQAccessExpireTime', currTime+parseInt(hashQuery.expires_in, 10) * 1000);
+
+        /**
+        * 这块是为了实现发起登录的页面
+        * 能够在登录成功回跳回来的时候，能够知道当前是从未登录到登录的第一次访问
+        * 这样可以显示一些登录成功的状态提示
+        *
+        * 登录的中转页会在登录成功之后记录QQLoginSuccess 和 QQLoginSuccessTime 到本地
+        *
+        * 脚本这块会在识别此状态之后，立马清空上述两个值，避免干扰下次判断
+        */
+        localStorage.setItem('QQLoginSuccess', 'login-success');
+        localStorage.setItem('QQLoginSuccessTime', currTime);
+
+        // 避免不能直接跳转的情况
+        setTimeout(function(){
+            var domA = document.querySelector('a');
+            var domJump = document.getElementById('click-jump');
+            domA.setAttribute('href', searchQuery.redirect);
+            domA.innerText = searchQuery.redirect;
+            domJump.classList.remove('hide');
+        }, 3000);
+
+        // 延时跳转，保证存储成功
+        setTimeout(function(){
+            location.href = searchQuery.redirect;
+        }, 1);
+    </script>
+</body>
+</html>
